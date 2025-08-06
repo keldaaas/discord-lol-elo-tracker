@@ -1,12 +1,14 @@
-using DiscordLoLEloTracker.Models.Enums;
+using DiscordTournamentManager.Models.Enums;
 
-namespace DiscordLoLEloTracker.Models;
+namespace DiscordTournamentManager.Models;
 
 public class Matchup
 {
     public int Id { get; set; }
-    public Guid TeamOneId { get; set; }
-    public Guid TeamTwoId { get; set; }
-    public DateOnly? Date { get; set; }
+    public Guid TeamOneId { get; init; }
+    public Guid TeamTwoId { get; init; }
+    public DateTime? Date { get; set; }
+    public Guid? RequestingTeamId { get; set; }
+    public bool Confirmed { get; set; }
     public GameResult GameResult { get; set; }
 }

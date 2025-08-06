@@ -1,4 +1,4 @@
-namespace DiscordLoLEloTracker.Models.Enums;
+namespace DiscordTournamentManager.Models.Enums;
 
 public enum GameResult
 {

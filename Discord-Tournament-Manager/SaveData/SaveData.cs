@@ -1,6 +1,6 @@
-using DiscordLoLEloTracker.Models;
+using DiscordTournamentManager.Models;
 
-namespace DiscordLoLEloTracker.SaveData;
+namespace DiscordTournamentManager.SaveData;
 
 public record SaveData
 {

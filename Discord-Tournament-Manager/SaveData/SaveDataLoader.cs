@@ -1,8 +1,7 @@
 using System.Security.Cryptography;
 using System.Text.Json;
-using DiscordLoLEloTracker.Models;
 
-namespace DiscordLoLEloTracker.SaveData;
+namespace DiscordTournamentManager.SaveData;
 
 public static class SaveDataLoader
 {
@@ -11,25 +10,15 @@ public static class SaveDataLoader
     
     public static async Task Save()
     {
-        var filePath = Path.Combine(
-            new DirectoryInfo(Directory.GetCurrentDirectory())
-                .Parent?
-                .Parent?
-                .FullName ?? throw new InvalidOperationException("Cannot go 2 levels up."),
-            SaveDataFileName);
+        var filePath = GetFilePath();
 
         await using var stream = File.Create(filePath);
         await JsonSerializer.SerializeAsync(stream, SaveData);
     }
-    
+
     public static async Task Load()
     {
-        var filePath = Path.Combine(
-            new DirectoryInfo(Directory.GetCurrentDirectory())
-                .Parent?
-                .Parent?
-                .FullName ?? throw new InvalidOperationException("Cannot go 2 levels up."),
-            SaveDataFileName);
+        var filePath = GetFilePath();
 
         if (!File.Exists(filePath))
         {
@@ -55,4 +44,12 @@ public static class SaveDataLoader
             FileName = "SaveData" + RandomNumberGenerator.GetInt32(100000, 1000000) + ".json"
         };
     }
+
+    private static string GetFilePath() =>
+        Path.Combine(
+            new DirectoryInfo(Directory.GetCurrentDirectory())
+                .Parent?
+                .Parent?
+                .FullName ?? throw new InvalidOperationException("Cannot go 2 levels up."),
+            SaveDataFileName);
 }

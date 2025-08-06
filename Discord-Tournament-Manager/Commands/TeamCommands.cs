@@ -1,19 +1,30 @@
 using System.Diagnostics.CodeAnalysis;
-using DiscordLoLEloTracker.Models;
-using DiscordLoLEloTracker.SaveData;
+using DiscordTournamentManager.SaveData;
+using NetCord;
 using NetCord.Services.ApplicationCommands;
+using Team = DiscordTournamentManager.Models.Team;
 
-namespace DiscordLoLEloTracker.Commands;
+namespace DiscordTournamentManager.Commands;
 
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "UnusedType.Global")]
 public class TeamCommands : ApplicationCommandModule<ApplicationCommandContext>
 {
-    [SlashCommand("add", "Adds a new team")]
+    [SlashCommand("list", "Listet alle registrierten Teams auf")]
+    public static string ListTeams()
+    {
+        var teams = SaveDataLoader.SaveData!.Teams.Where(x => !x.Deleted).ToList();
+        
+        return teams.Count == 0 
+            ? "Es wurden keine Teams hinzugefügt.." 
+            : $"{string.Join('\n', teams.Select(x => $"{x.Name} ({x.Id})").ToList())}";
+    }
+
+    [SlashCommand("add", "Fügt ein neues Team hinzu", DefaultGuildUserPermissions = Permissions.ManageEvents)]
     public static async Task<string> AddTeam(string name, string role)
     {
-        if (SaveDataLoader.SaveData!.Teams.Select(x => x.Name).Contains(name))
-            return "Team already exists.";
+        if (SaveDataLoader.SaveData!.Teams.Where(x => !x.Deleted).Select(x => x.Name).Contains(name))
+            return "Team wurde schon hinzugefügt.";
 
         SaveDataLoader.SaveData.Teams.Add(new Team
         {
@@ -24,19 +35,22 @@ public class TeamCommands : ApplicationCommandModule<ApplicationCommandContext>
 
         await SaveDataLoader.Save();
         
-        return $"Created new team '{name}'.";
+        return $"Neues Team '{name}' hinzugefügt.";
     }
     
-    [SlashCommand("remove", "Remove a team")]
+    [SlashCommand("remove", "Entfernt ein Team", DefaultGuildUserPermissions = Permissions.ManageEvents)]
     public static async Task<string> RemoveTeam(string name)
     {
-        if (!SaveDataLoader.SaveData!.Teams.Select(x => x.Name).Contains(name))
-            return "There is not such team.";
+        if (!SaveDataLoader.SaveData!.Teams.Where(x => !x.Deleted).Select(x => x.Name).Contains(name))
+            return $"Es gibt kein registriertes Team mit dem Namen '{name}'.";
         
-        SaveDataLoader.SaveData.Teams.RemoveAll(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
+        foreach (var team in SaveDataLoader.SaveData.Teams.Where(team => team.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        {
+            team.Deleted = true;
+        }
+        
         await SaveDataLoader.Save();
         
-        return $"Removed '{name}'.";
+        return $"'{name}' wurde entfernt.";
     }
 }
